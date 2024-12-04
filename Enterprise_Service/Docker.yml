@@ -1,0 +1,62 @@
+---
+
+- name: Creating Docker Images and Running Nginx Containers
+  hosts: nginx
+  become: yes
+  tasks:
+
+    - name: Ensure destination directory exists
+      file:
+        path: /home/qjltbarquilla/Final_Exam_Barquilla/Enterprise_Service/
+        state: directory
+        owner: qjltbarquilla
+        mode: '0755'
+
+    - name: Copy the Docker files into the servers
+      copy:
+        src: ~/Final_Exam_Barquilla/Enterprise_Service/
+        dest: /home/qjltbarquilla/Final_Exam_Barquilla/Enterprise_Service/
+        owner: qjltbarquilla
+        mode: '0755'  # Optional: Set the mode if needed
+
+    - name: Build Docker Image for Ubuntu on the servers
+      docker_image:
+        source: build
+        build:
+          path: /home/qjltbarquilla/Final_Exam_Barquilla/Enterprise_Service/
+          dockerfile: Dockerfile  # Specify your actual Dockerfile here
+          pull: yes  # Pull the base image before building
+        name: nginx-ubuntu
+        tag: latest
+        state: present
+      register: ubuntu_image
+
+    - name: Build Docker Image for CentOS on the servers
+      docker_image:
+        source: build
+        build:
+          path: /home/qjltbarquilla/Final_Exam_Barquilla/Enterprise_Service/
+          dockerfile: Dockerfile  # Specify your actual Dockerfile here
+          pull: yes  # Pull the base image before building
+        name: nginx-centos
+        tag: latest
+        state: present
+      register: centos_image
+
+    - name: Run Nginx Container from Ubuntu Image
+      docker_container:
+        name: nginx-ubuntu-container
+        image: nginx-ubuntu:latest
+        state: started
+        ports:
+          - "80:80"
+        restart_policy: always
+
+    - name: Run Nginx Container from CentOS Image
+      docker_container:
+        name: nginx-centos-container
+        image: nginx-centos:latest
+        state: started
+        ports:
+          - "81:80"  # Use different port to avoid conflict
+        restart_policy: always

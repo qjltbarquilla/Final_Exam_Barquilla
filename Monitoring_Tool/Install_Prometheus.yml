@@ -1,0 +1,74 @@
+---
+
+- name: Install Prometheus on Ubuntu and CentOS
+  hosts: prometheus
+  become: yes
+  tasks:
+
+    - name: Install necessary packages for Ubuntu
+      when: ansible_facts['os_family'] == "Debian"
+      apt:
+        name:
+          - wget
+          - curl
+          - tar
+        update_cache: yes
+        state: present
+
+    - name: Enable EPEL repository in CentOS
+      when: ansible_facts['os_family'] == "RedHat"
+      dnf:
+        name: epel-release
+        state: present
+    
+    - name: Install necessary packages for CentOS
+      when: ansible_facts['os_family'] == "RedHat"
+      dnf:
+        name:
+          - wget
+          - curl
+          - tar
+        state: present
+
+    - name: Download Prometheus tar.gz
+      get_url:
+        url: "https://github.com/prometheus/prometheus/releases/download/v2.50.0/prometheus-2.50.0.linux-amd64.tar.gz"
+        dest: "/tmp/prometheus.tar.gz"
+
+    - name: Extract Prometheus binaries
+      unarchive:
+        src: "/tmp/prometheus.tar.gz"
+        dest: /tmp/
+        remote_src: yes
+
+    - name: Create a user for Prometheus
+      user:
+        name: prometheus
+        system: yes
+        shell: /bin/false
+
+    - name: Create necessary directories
+      file:
+        path: "{{ item }}"
+        state: directory
+        owner: prometheus
+        group: prometheus
+      loop:
+        - /etc/prometheus
+        - /var/lib/prometheus
+
+    - name: Move Prometheus binaries to /usr/local/bin
+      command: mv /tmp/prometheus-2.50.0.linux-amd64/{{ item }} /usr/local/bin/
+      with_items:
+        - prometheus
+        - promtool
+
+    - name: Set ownership for Prometheus binaries
+      file:
+        path: /usr/local/bin/{{ item }}
+        owner: prometheus
+        group: prometheus
+      with_items:
+        - prometheus
+        - promtool
+

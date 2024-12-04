@@ -1,0 +1,11 @@
+ARG BASE_IMAGE=ubuntu:20.04
+FROM ${BASE_IMAGE}
+
+COPY install-nginx.sh /usr/local/bin/install-nginx.sh
+RUN chmod +x /usr/local/bin/install-nginx.sh
+
+RUN /usr/local/bin/install-nginx.sh
+
+EXPOSE 80
+
+CMD ["nginx", "-g", "daemon off;"]
