@@ -17,15 +17,15 @@
         src: ~/Final_Exam_Barquilla/Enterprise_Service/
         dest: /home/qjltbarquilla/Final_Exam_Barquilla/Enterprise_Service/
         owner: qjltbarquilla
-        mode: '0755'  # Optional: Set the mode if needed
+        mode: '0755'  
 
     - name: Build Docker Image for Ubuntu on the servers
       docker_image:
         source: build
         build:
           path: /home/qjltbarquilla/Final_Exam_Barquilla/Enterprise_Service/
-          dockerfile: Dockerfile  # Specify your actual Dockerfile here
-          pull: yes  # Pull the base image before building
+          dockerfile: Dockerfile  
+          pull: yes  
         name: nginx-ubuntu
         tag: latest
         state: present
@@ -36,8 +36,8 @@
         source: build
         build:
           path: /home/qjltbarquilla/Final_Exam_Barquilla/Enterprise_Service/
-          dockerfile: Dockerfile  # Specify your actual Dockerfile here
-          pull: yes  # Pull the base image before building
+          dockerfile: Dockerfile  
+          pull: yes  
         name: nginx-centos
         tag: latest
         state: present
@@ -58,5 +58,5 @@
         image: nginx-centos:latest
         state: started
         ports:
-          - "81:80"  # Use different port to avoid conflict
+          - "81:80"  
         restart_policy: always
